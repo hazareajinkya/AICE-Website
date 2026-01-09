@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-background: #000000;
+  --color-foreground: #ffffff;
+  
+  --font-heading: var(--font-oswald);
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-inter);
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-neon-cyan: #00f3ff;
+  --color-neon-green: #00ff9d;
+  --color-neon-purple: #bd00ff;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Explicit Font Classes for Tailwind v4 */
+.font-serif {
+  font-family: var(--font-playfair);
+}
+
+.font-heading {
+  font-family: var(--font-bebas);
+}
+
+.font-sans {
+  font-family: var(--font-inter);
+}
+
+/* Custom Utilities */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-green));
 }

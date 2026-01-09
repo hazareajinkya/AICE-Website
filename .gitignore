@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local files
+IMAGES/
+images_ref/
+images2/
+video/
+video2/
+Playfair_Display.zip
+Playfair_Display/
