@@ -11,9 +11,9 @@ export default function Footer() {
         </div>
 
         <div className="flex gap-8 text-xs text-gray-500 uppercase tracking-widest">
-          <a href="#" className="hover:text-white transition">Privacy</a>
-          <a href="#" className="hover:text-white transition">Terms</a>
-          <a href="#" className="hover:text-white transition">Contact</a>
+          <a href="/privacy" className="hover:text-white transition">Privacy</a>
+          <a href="/terms" className="hover:text-white transition">Terms</a>
+          <a href="/contact" className="hover:text-white transition">Contact</a>
         </div>
 
         <div className="text-gray-600 text-[10px] uppercase tracking-widest">
