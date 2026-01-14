@@ -53,7 +53,29 @@ export default function HeroSection() {
       };
 
       // Remove undefined values (Firestore doesn't like them)
-      const cleanData = JSON.parse(JSON.stringify(finalUserData));
+      // But keep null values and empty objects for location
+      const cleanData = JSON.parse(JSON.stringify(finalUserData, (key, value) => {
+        // Keep location even if it's an empty object or has some null values
+        if (key === 'location' && value && typeof value === 'object') {
+          // Remove only completely undefined fields, keep nulls
+          const cleaned: any = {};
+          Object.keys(value).forEach(k => {
+            if (value[k] !== undefined) {
+              cleaned[k] = value[k];
+            }
+          });
+          return Object.keys(cleaned).length > 0 ? cleaned : undefined;
+        }
+        return value === undefined ? undefined : value;
+      }));
+      
+      // Log what we're saving to Firebase
+      console.log("Saving to Firebase - course_preenrollment:", {
+        email: cleanData.email,
+        hasLocation: !!cleanData.location,
+        location: cleanData.location,
+        source: cleanData.source,
+      });
 
       // Save to Firestore (using email as document ID)
       await setDoc(doc(db, "course_preenrollment", email), cleanData);
