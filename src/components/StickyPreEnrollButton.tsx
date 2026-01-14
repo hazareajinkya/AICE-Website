@@ -2,10 +2,17 @@
 
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/clients/firebase';
+import { toast } from 'sonner';
+import { collectUserData } from '@/lib/utils/user-data';
 
 export default function StickyPreEnrollButton() {
   const [isVisible, setIsVisible] = useState(false);
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [pageLoadTime] = useState(new Date().toISOString());
 
   useEffect(() => {
     const handleScroll = () => {
@@ -23,13 +30,78 @@ export default function StickyPreEnrollButton() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Track time on page
+  useEffect(() => {
+    if (isSubmitted) {
+      const timeOnPage = Math.round(
+        (new Date().getTime() - new Date(pageLoadTime).getTime()) / 1000
+      );
+      // Store time on page in sessionStorage for later use
+      sessionStorage.setItem("timeOnPage", timeOnPage.toString());
+    }
+  }, [isSubmitted, pageLoadTime]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle email submission here
-    console.log('Pre-enrollment email:', email);
-    // You can add API call or other logic here
-    alert(`Thank you! We'll notify you at ${email} when enrollment opens.`);
-    setEmail('');
+    if (!email) return;
+
+    setIsLoading(true);
+    try {
+      // Check if Firebase is initialized
+      if (!db) {
+        throw new Error("Firebase not initialized. Check your .env.local file and restart the server.");
+      }
+
+      // Collect comprehensive user data (including location)
+      const userData = await collectUserData(email, "sticky_button");
+      
+      // Calculate time on page
+      const timeOnPage = Math.round(
+        (new Date().getTime() - new Date(pageLoadTime).getTime()) / 1000
+      );
+      
+      // Add time on page to user data
+      const finalUserData = {
+        ...userData,
+        session: {
+          ...userData.session,
+          timeOnPage,
+        },
+      };
+
+      // Remove undefined values (Firestore doesn't like them)
+      const cleanData = JSON.parse(JSON.stringify(finalUserData));
+
+      // Save to Firestore (using email as document ID)
+      await setDoc(doc(db, "course_preenrollment", email), cleanData);
+      
+      setIsSubmitted(true);
+      toast.success("Thank you! We'll notify you when enrollment opens.");
+      setEmail('');
+    } catch (error) {
+      console.error("Error pre-enrolling:", error);
+      
+      // Show detailed error in console
+      const firebaseError = error as { code?: string; message?: string };
+      if (firebaseError.code) {
+        console.error("Firebase error code:", firebaseError.code);
+        console.error("Firebase error message:", firebaseError.message);
+      }
+      
+      // User-friendly error message
+      let errorMessage = "Failed to pre-enroll. Please try again.";
+      if (firebaseError.code === "permission-denied") {
+        errorMessage = "Permission denied. Check Firestore rules.";
+      } else if (firebaseError.code === "unavailable") {
+        errorMessage = "Service unavailable. Check your internet connection.";
+      } else if (firebaseError.message?.includes("Firebase not initialized")) {
+        errorMessage = "Firebase not configured. Check .env.local file.";
+      }
+      
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -54,11 +126,39 @@ export default function StickyPreEnrollButton() {
             />
             <motion.button 
               type="submit"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="border border-white bg-white px-8 md:px-10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-white/90 transition duration-300 backdrop-blur-sm whitespace-nowrap"
+              disabled={isLoading || isSubmitted}
+              whileHover={!isLoading && !isSubmitted ? { scale: 1.05 } : {}}
+              whileTap={!isLoading && !isSubmitted ? { scale: 0.95 } : {}}
+              className="border border-white bg-white px-8 md:px-10 py-3 md:py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-white/90 transition duration-300 backdrop-blur-sm whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Pre-Enroll Now
+              {isLoading ? (
+                <>
+                  <svg
+                    className="animate-spin h-4 w-4 inline-block mr-2"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                    />
+                  </svg>
+                  Submitting...
+                </>
+              ) : isSubmitted ? (
+                "Thank You!"
+              ) : (
+                "Pre-Enroll Now"
+              )}
             </motion.button>
           </motion.form>
         </div>
