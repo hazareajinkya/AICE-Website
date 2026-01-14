@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #000000;
+  --color-foreground: #ffffff;
+  
+  --font-heading: var(--font-oswald);
+  --font-serif: var(--font-playfair);
+  --font-sans: var(--font-inter);
+
+  --color-neon-cyan: #00f3ff;
+  --color-neon-green: #00ff9d;
+  --color-neon-purple: #bd00ff;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
+
+/* Explicit Font Classes for Tailwind v4 */
+.font-serif {
+  font-family: var(--font-playfair);
+}
+
+.font-heading {
+  font-family: var(--font-bebas);
+}
+
+.font-sans {
+  font-family: var(--font-inter);
+}
+
+/* Custom Utilities */
+.text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-green));
+}
