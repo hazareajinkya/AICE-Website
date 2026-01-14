@@ -1,8 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function HeroSection() {
+  const [email, setEmail] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Handle email submission here
+    console.log('Pre-enrollment email:', email);
+    // You can add API call or other logic here
+    alert(`Thank you! We'll notify you at ${email} when enrollment opens.`);
+    setEmail('');
+  };
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black text-white">
       
@@ -82,14 +93,31 @@ export default function HeroSection() {
           </div>
         </motion.div>
 
-        {/* CTA Button */}
-        <motion.button 
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="mt-16 border border-white px-10 py-4 text-sm font-bold uppercase tracking-widest hover:bg-white hover:text-black transition duration-300 backdrop-blur-sm"
+        {/* Pre-Enrollment Form */}
+        <motion.form 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          onSubmit={handleSubmit}
+          className="mt-16 flex flex-col gap-4 md:flex-row md:items-center"
         >
-          Enroll Now - ₹39,999
-        </motion.button>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="youremail@gmail.com"
+            required
+            className="border border-white bg-black/30 px-6 py-4 text-sm text-white placeholder-gray-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white transition duration-300 md:w-80"
+          />
+          <motion.button 
+            type="submit"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="border border-white bg-white px-10 py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-white/90 transition duration-300 backdrop-blur-sm"
+          >
+            Pre-Enroll Now
+          </motion.button>
+        </motion.form>
 
       </div>
     </section>
