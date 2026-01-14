@@ -99,27 +99,52 @@ function getUTMParams(): {
 async function getLocationData(): Promise<UserData["location"]> {
   try {
     // Using ip-api.com (free, no API key needed, 45 req/min)
-    const response = await fetch("http://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp");
+    // Using HTTPS to avoid CORS issues
+    const response = await fetch("https://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp", {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
+    
+    if (!response.ok) {
+      console.warn("Location API response not OK:", response.status, response.statusText);
+      return undefined;
+    }
+    
     const data = await response.json();
     
     if (data.status === "success") {
-      return {
-        country: data.country,
-        countryCode: data.countryCode,
-        region: data.region,
-        regionName: data.regionName,
-        city: data.city,
-        zip: data.zip,
-        lat: data.lat,
-        lon: data.lon,
-        timezone: data.timezone,
-        isp: data.isp,
+      const locationData = {
+        country: data.country || undefined,
+        countryCode: data.countryCode || undefined,
+        region: data.region || undefined,
+        regionName: data.regionName || undefined,
+        city: data.city || undefined,
+        zip: data.zip || undefined,
+        lat: data.lat || undefined,
+        lon: data.lon || undefined,
+        timezone: data.timezone || undefined,
+        isp: data.isp || undefined,
       };
+      
+      // Only return if we have at least some data
+      if (locationData.country || locationData.city) {
+        console.log("Location data fetched successfully:", locationData);
+        return locationData;
+      } else {
+        console.warn("Location API returned success but no location data");
+        return undefined;
+      }
+    } else {
+      console.warn("Location API returned error:", data.message || "Unknown error");
+      return undefined;
     }
   } catch (error) {
     console.error("Error fetching location:", error);
+    // Return undefined instead of throwing to allow form submission to continue
+    return undefined;
   }
-  return undefined;
 }
 
 /**
@@ -172,12 +197,19 @@ export async function collectUserData(email: string, source: string = "landing_p
 
   // Get location data (async)
   const location = await getLocationData();
+  
+  // Log location data for debugging
+  if (location) {
+    console.log("Location data collected:", location);
+  } else {
+    console.warn("Location data not available (API may have failed or been blocked)");
+  }
 
-  return {
+  const userData: UserData = {
     email,
     subscribedAt: new Date().toISOString(),
     source,
-    location,
+    location: location || undefined, // Explicitly set to undefined if null
     device,
     referral,
     session: {
@@ -185,5 +217,18 @@ export async function collectUserData(email: string, source: string = "landing_p
       pageLoadTime,
     },
   };
+  
+  // Log final user data structure (without sensitive info)
+  console.log("User data structure:", {
+    email: userData.email,
+    source: userData.source,
+    hasLocation: !!userData.location,
+    locationKeys: userData.location ? Object.keys(userData.location) : [],
+    hasDevice: !!userData.device,
+    hasReferral: !!userData.referral,
+    hasSession: !!userData.session,
+  });
+
+  return userData;
 }
 
