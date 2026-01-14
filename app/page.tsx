@@ -3,6 +3,7 @@ import IntroSection from "@/components/IntroSection";
 import ModulesGrid from "@/components/ModulesGrid";
 import CurriculumSection from "@/components/CurriculumSection";
 import Footer from "@/components/Footer";
+import StickyPreEnrollButton from "@/components/StickyPreEnrollButton";
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
       <ModulesGrid />
       <CurriculumSection />
       <Footer />
+      <StickyPreEnrollButton />
     </main>
   );
 }
