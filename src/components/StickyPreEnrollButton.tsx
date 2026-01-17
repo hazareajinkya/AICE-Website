@@ -6,6 +6,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { db } from '@/lib/clients/firebase';
 import { toast } from 'sonner';
 import { collectUserData } from '@/lib/utils/user-data';
+import EmailInput from './EmailInput';
 
 export default function StickyPreEnrollButton() {
   const [isVisible, setIsVisible] = useState(false);
@@ -116,12 +117,12 @@ export default function StickyPreEnrollButton() {
             onSubmit={handleSubmit}
             className="flex flex-col gap-3 md:flex-row md:items-center md:justify-center"
           >
-            <input
-              type="email"
+            <EmailInput
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={setEmail}
               placeholder="youremail@gmail.com"
               required
+              disabled={isLoading || isSubmitted}
               className="border border-white bg-black/30 px-6 py-3 md:py-4 text-sm text-white placeholder-gray-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white transition duration-300 md:w-80"
             />
             <motion.button 

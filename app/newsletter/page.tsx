@@ -9,6 +9,7 @@ import GradientBlinds from "@/components/landing/gradient-blinds";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowRight, Check } from "lucide-react";
 import { collectUserData } from "@/lib/utils/user-data";
+import EmailInput from "@/components/EmailInput";
 
 export default function NewsletterPage() {
   const [email, setEmail] = useState("");
@@ -151,13 +152,13 @@ export default function NewsletterPage() {
                   onSubmit={handleJoinNewsletter}
                   className="flex flex-col sm:flex-row gap-3"
                 >
-                  <input
-                    type="email"
-                    placeholder="Enter your email"
+                  <EmailInput
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={setEmail}
+                    placeholder="Enter your email"
                     required
-                    className="input-premium flex-1 h-12 px-5 rounded-lg text-base bg-white/10 border-2 border-white/30 text-white placeholder:text-white/60 focus:bg-white/15 focus:border-white/50"
+                    disabled={isLoading}
+                    className="input-premium flex-1 h-12 px-5 rounded-lg text-base bg-white/10 border-2 border-white/30 text-white placeholder:text-white/60 focus:bg-white/15 focus:border-white/50 disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                   <button
                     type="submit"
