@@ -7,6 +7,7 @@ import { db } from '@/lib/clients/firebase';
 import { toast } from 'sonner';
 import { collectUserData } from '@/lib/utils/user-data';
 import { Check } from 'lucide-react';
+import EmailInput from './EmailInput';
 
 export default function HeroSection() {
   const [email, setEmail] = useState('');
@@ -196,10 +197,9 @@ export default function HeroSection() {
             onSubmit={handleSubmit}
             className="mt-16 flex flex-col gap-4 md:flex-row md:items-center"
           >
-            <input
-              type="email"
+            <EmailInput
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={setEmail}
               placeholder="youremail@gmail.com"
               required
               disabled={isLoading}

@@ -94,57 +94,88 @@ function getUTMParams(): {
 }
 
 /**
- * Get location data from IP (using free API)
+ * Get location data from IP (using free API with HTTPS support)
+ * Tries multiple APIs with fallback for reliability
  */
 async function getLocationData(): Promise<UserData["location"]> {
+  // Primary API: ipapi.co (free, HTTPS supported, 1000 req/day)
   try {
-    // Using ip-api.com (free, no API key needed, 45 req/min)
-    // Using HTTPS to avoid CORS issues
-    const response = await fetch("https://ip-api.com/json/?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp", {
+    const response = await fetch("https://ipapi.co/json/", {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
       },
     });
     
-    if (!response.ok) {
-      console.warn("Location API response not OK:", response.status, response.statusText);
-      return undefined;
+    if (response.ok) {
+      const data = await response.json();
+      
+      // ipapi.co returns error field if there's an issue
+      if (!data.error) {
+        // Map ipapi.co response format to our location data structure
+        const locationData = {
+          country: data.country_name || undefined,
+          countryCode: data.country_code || undefined,
+          region: data.region_code || undefined,
+          regionName: data.region || undefined,
+          city: data.city || undefined,
+          zip: data.postal || undefined,
+          lat: data.latitude || undefined,
+          lon: data.longitude || undefined,
+          timezone: data.timezone || undefined,
+          isp: data.org || undefined,
+        };
+        
+        // Only return if we have at least some data
+        if (locationData.country || locationData.city) {
+          console.log("Location data fetched successfully from ipapi.co:", locationData);
+          return locationData;
+        }
+      }
     }
+  } catch (error) {
+    console.warn("Primary location API (ipapi.co) failed, trying fallback:", error);
+  }
+  
+  // Fallback API: ipinfo.io (free, HTTPS supported, 50k req/month)
+  try {
+    const response = await fetch("https://ipinfo.io/json", {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
     
-    const data = await response.json();
-    
-    if (data.status === "success") {
+    if (response.ok) {
+      const data = await response.json();
+      
+      // ipinfo.io uses different field names (country is 2-letter code only)
       const locationData = {
-        country: data.country || undefined,
-        countryCode: data.countryCode || undefined,
+        country: undefined, // ipinfo.io doesn't provide full country name, only code
+        countryCode: data.country || undefined,
         region: data.region || undefined,
-        regionName: data.regionName || undefined,
+        regionName: data.region || undefined,
         city: data.city || undefined,
-        zip: data.zip || undefined,
-        lat: data.lat || undefined,
-        lon: data.lon || undefined,
+        zip: data.postal || undefined,
+        lat: data.loc ? parseFloat(data.loc.split(',')[0]) : undefined,
+        lon: data.loc ? parseFloat(data.loc.split(',')[1]) : undefined,
         timezone: data.timezone || undefined,
-        isp: data.isp || undefined,
+        isp: data.org || undefined,
       };
       
       // Only return if we have at least some data
-      if (locationData.country || locationData.city) {
-        console.log("Location data fetched successfully:", locationData);
+      if (locationData.countryCode || locationData.city) {
+        console.log("Location data fetched successfully from ipinfo.io (fallback):", locationData);
         return locationData;
-      } else {
-        console.warn("Location API returned success but no location data");
-        return undefined;
       }
-    } else {
-      console.warn("Location API returned error:", data.message || "Unknown error");
-      return undefined;
     }
   } catch (error) {
-    console.error("Error fetching location:", error);
-    // Return undefined instead of throwing to allow form submission to continue
-    return undefined;
+    console.warn("Fallback location API (ipinfo.io) also failed:", error);
   }
+  
+  // If both APIs fail, return undefined (form submission will continue)
+  console.warn("All location APIs failed. Form submission will continue without location data.");
+  return undefined;
 }
 
 /**

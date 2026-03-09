@@ -39,3 +39,67 @@ body {
   color: transparent;
   background-image: linear-gradient(to right, var(--color-neon-cyan), var(--color-neon-green));
 }
+
+/* Premium input - visible styling */
+.input-premium {
+  background: rgba(255, 255, 255, 0.15) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 255, 255, 0.4) !important;
+  color: #ffffff !important;
+  transition: all 0.2s ease;
+  min-height: 48px;
+}
+
+.input-premium::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.input-premium:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.input-premium:focus {
+  background: rgba(255, 255, 255, 0.2) !important;
+  border-color: rgba(255, 255, 255, 0.7) !important;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Premium button */
+.btn-premium {
+  background: #ffffff;
+  color: #000000;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-premium:hover {
+  background: #f0f0f0;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+}
+
+.btn-premium:active {
+  transform: translateY(0);
+  background: #e5e5e5;
+}
+
+.btn-premium:disabled {
+  background: rgba(255, 255, 255, 0.5);
+  cursor: not-allowed;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}

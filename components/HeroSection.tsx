@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../src/lib/clients/firebase";
+import EmailInput from '@/components/EmailInput';
 
 export default function HeroSection() {
   const [email, setEmail] = useState('');
@@ -124,10 +125,9 @@ export default function HeroSection() {
           onSubmit={handleSubmit}
           className="mt-16 flex flex-col gap-4 md:flex-row md:items-center"
         >
-          <input
-            type="email"
+          <EmailInput
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={setEmail}
             placeholder="youremail@gmail.com"
             required
             className="border border-white bg-black/30 px-6 py-4 text-sm text-white placeholder-gray-400 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white transition duration-300 md:w-80"

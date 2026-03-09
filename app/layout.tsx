@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Oswald, Playfair_Display, Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import "./globals.css";
 
 const oswald = Oswald({
@@ -35,6 +36,7 @@ export default function RootLayout({
         className={`${oswald.variable} ${playfair.variable} ${inter.variable} antialiased bg-black text-white`}
       >
         {children}
+        <Toaster position="top-center" richColors />
       </body>
     </html>
   );
