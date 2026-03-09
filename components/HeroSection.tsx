@@ -2,17 +2,40 @@
 
 import { motion } from 'framer-motion';
 import { useState } from 'react';
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../src/lib/clients/firebase";
 
 export default function HeroSection() {
   const [email, setEmail] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle email submission here
-    console.log('Pre-enrollment email:', email);
-    // You can add API call or other logic here
-    alert(`Thank you! We'll notify you at ${email} when enrollment opens.`);
-    setEmail('');
+    if (!email) return;
+    
+    setIsLoading(true);
+    try {
+      if (!db) {
+        throw new Error("Firebase not initialized.");
+      }
+      
+      const signupData = {
+        email,
+        timestamp: new Date().toISOString(),
+        source: "hero_pre_enrollment"
+      };
+      
+      // Save to course_pre_enrollments collection
+      await setDoc(doc(db, "course_pre_enrollments", email), signupData);
+      
+      alert(`Thank you! We'll notify you at ${email} when enrollment opens.`);
+      setEmail('');
+    } catch (error) {
+      console.error("Error subscribing:", error);
+      alert("Failed to subscribe. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
   return (
     <section className="relative h-screen w-full overflow-hidden bg-black text-white">
@@ -111,11 +134,12 @@ export default function HeroSection() {
           />
           <motion.button 
             type="submit"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="border border-white bg-white px-10 py-4 text-sm font-bold uppercase tracking-widest text-black hover:bg-white/90 transition duration-300 backdrop-blur-sm"
+            disabled={isLoading}
+            whileHover={{ scale: isLoading ? 1 : 1.05 }}
+            whileTap={{ scale: isLoading ? 1 : 0.95 }}
+            className={`border border-white bg-white px-10 py-4 text-sm font-bold uppercase tracking-widest text-black transition duration-300 backdrop-blur-sm ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-white/90'}`}
           >
-            Pre-Enroll Now
+            {isLoading ? "Submitting..." : "Pre-Enroll Now"}
           </motion.button>
         </motion.form>
 
