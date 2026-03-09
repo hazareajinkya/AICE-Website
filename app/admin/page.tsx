@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../../lib/clients/firebase";
+import { db } from "../../src/lib/clients/firebase";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,22 +36,37 @@ export default function AdminDashboard() {
   };
 
   const fetchData = async () => {
-    if (!db) return;
+    console.log("fetchData called. is db initialized?", !!db);
+    if (!db) {
+      setError("Firebase database is not initialized. Check .env.local");
+      setIsLoading(false);
+      return;
+    }
+    
     setIsLoading(true);
+    setError(""); // clear previous errors
+    
     try {
       // Fetch Newsletter Subscribers
+      console.log("Fetching newsletter_subscribers...");
       const nQuery = query(collection(db, "newsletter_subscribers"));
       const nSnapshot = await getDocs(nQuery);
+      console.log(`Newsletter snapshot empty? ${nSnapshot.empty}, size: ${nSnapshot.size}`);
       const nData = nSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log("Parsed newsletter data:", nData);
       setNewsletterData(nData);
 
       // Fetch Pre-enrollments
+      console.log("Fetching course_preenrollment...");
       const pQuery = query(collection(db, "course_preenrollment"));
       const pSnapshot = await getDocs(pQuery);
+      console.log(`Pre-enrollment snapshot empty? ${pSnapshot.empty}, size: ${pSnapshot.size}`);
       const pData = pSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      console.log("Parsed pre-enrollment data:", pData);
       setPreEnrollmentsData(pData);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching data:", err);
+      setError(`Failed to fetch data: ${err.message || 'Unknown error'}`);
     } finally {
       setIsLoading(false);
     }
